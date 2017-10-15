@@ -1,0 +1,9 @@
+C:\Users\User\Source\Repos\ExcelTransform\ExcelTransform\bin\Debug\ExcelTransform.exe
+C:\Users\User\Source\Repos\ExcelTransform\ExcelTransform\bin\Debug\ExcelTransform.pdb
+C:\Users\User\Source\Repos\ExcelTransform\ExcelTransform\obj\Debug\ExcelTransform.csprojResolveAssemblyReference.cache
+C:\Users\User\Source\Repos\ExcelTransform\ExcelTransform\obj\Debug\ExcelTransform.Properties.Resources.resources
+C:\Users\User\Source\Repos\ExcelTransform\ExcelTransform\obj\Debug\ExcelTransform.csproj.GenerateResource.Cache
+C:\Users\User\Source\Repos\ExcelTransform\ExcelTransform\obj\Debug\ExcelTransform.exe
+C:\Users\User\Source\Repos\ExcelTransform\ExcelTransform\obj\Debug\ExcelTransform.pdb
+C:\Users\User\Source\Repos\ExcelTransform\ExcelTransform\obj\Debug\ExcelTransform.Form1.resources
+C:\Users\User\Source\Repos\ExcelTransform\ExcelTransform\obj\Debug\ExcelTransform.csproj.ResolveComReference.cache
