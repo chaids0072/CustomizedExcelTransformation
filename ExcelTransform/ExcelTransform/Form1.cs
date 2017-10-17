@@ -21,7 +21,7 @@ namespace ExcelTransform
         {
             InitializeComponent();
             Court.LABEL = label5;
-            Court.LABEL.Text = "Done: " + Court.PROCESSED_ROWS;
+            UpdateFunction.UpdateProcessedRow();
         }
 
         private void Form1_DragDrop(object sender, DragEventArgs e)
@@ -41,25 +41,25 @@ namespace ExcelTransform
             if (string.Equals(ext, ".xlsx", StringComparison.CurrentCultureIgnoreCase)
                 || string.Equals(ext, ".xls", StringComparison.CurrentCultureIgnoreCase))
             {
-                Excel _excel = new Excel(@path, 1);
-                String[,] _temp = _excel.ReadAll();
+                Court.excel = new Excel(@path, 1);
+                String[,] _temp = Court.excel.ReadAll();
 
-                for (int j = 0; j < _excel.cols; j++)
+                for (int j = 0; j < Court.excel.cols; j++)
                 {
                     string _expression = @"^[\p{L}]+(.*)\d+[.]?\d*%?$";
                     Regex _objNotNumberPattern = new Regex(_expression);
 
                     if (_objNotNumberPattern.IsMatch(_temp[1, j]))
                     {
-                        _excel.specfialCol = j + 1;
+                        Court.excel.specfialCol = j + 1;
                         break;
                     }
                 }
 
-                _excel.pushCol(_excel.specfialCol);
-                _excel.specialReplace();
-                _excel.SaveAs(path.Insert(path.LastIndexOf("."), "_transformed"));
-                _excel.Close();
+                Court.excel.pushCol(Court.excel.specfialCol);
+                Court.excel.specialReplace();
+                Court.excel.SaveAs(path.Insert(path.LastIndexOf("."), "_transformed"));
+                Court.excel.Close();
 
                 listBox1.Items.Add(System.IO.Path.GetFileNameWithoutExtension(path) + "...processed successfully!");
             }
@@ -120,11 +120,16 @@ namespace ExcelTransform
         {
             listBox2.Items.Clear();
             listBox1.Items.Clear();
-            Court.PROCESSED_ROWS = 0;
-            Court.LABEL.Text = "Done: " + Court.PROCESSED_ROWS;
+            Court.excel.Clear();
+            UpdateFunction.UpdateProcessedRow();
         }
 
         private void groupBox1_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button3_Click(object sender, EventArgs e)
         {
 
         }
