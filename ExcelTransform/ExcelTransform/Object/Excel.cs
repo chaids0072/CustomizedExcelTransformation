@@ -17,9 +17,9 @@ namespace ExcelTransform
         public  string[,] content { get; private set; }
         public int rows { get; private set; }
         public int cols { get; private set; }
-        public int specfialCol { get; private set; }
+        public int specfialCol;
         public string path { get; private set; }
-        public static int processedRows { get; private set; }
+        public static int processedRows;
 
         public Excel(string path, int sheet)
         {
@@ -48,7 +48,6 @@ namespace ExcelTransform
 
         public string[,] ReadAll()
         {
-            Console.WriteLine(rows + " + " + cols);
             for (int i = 1; i <= rows; i++)
             {
                 for (int j = 1; j <= cols; j++)
@@ -77,70 +76,14 @@ namespace ExcelTransform
             }
         }
 
-        public void specialReplace()
-        {
-            string expression = @"[\d]{1,4}([.,][\d]{0,10})?";
-            string expression_symbol = @"^[\u4e00-\u9fa5]{0,100}$";
-           
-            Regex objNotNumberPattern = new Regex(expression);
-            Regex objNotSymbolPattern = new Regex(expression_symbol);
-            Match match , match2;
-
-            //copy percentage out
-            for (int i = 1; i <= this.rows; i++)
-            {
-
-                match = objNotNumberPattern.Match(Convert.ToString(WS.Cells[i, specfialCol].Value));
-                int tempCol = specfialCol + 1;
-                if (match.Success)
-                {
-                    string _string = match.Value;
-                    WriteToCell(i, tempCol, match.Value + " %");
-                }
-                else
-                {
-                    WriteToCell(i, tempCol, "");
-                }
-
-            }
-
-            //remove original cell
-            for (int i = 1; i <= this.rows; i++)
-            {
-
-                match2 = objNotNumberPattern.Match(Convert.ToString(WS.Cells[i, specfialCol].Value2));
-                string[] pattern = new string[] { "：", ':'.ToString(), '*'.ToString(), '.'.ToString(), '"'.ToString() };
-                char[] array = string.Join(string.Empty, pattern).ToCharArray();
-
-                if (match2.Success)
-                {
-                    string tempString = Convert.ToString(WS.Cells[i, specfialCol].Value2);
-                    tempString = tempString.Replace("%", "").Replace(match2.Value, "").Trim(array);
-
-                    WriteToCell(i, specfialCol, tempString);
-                }
-                Excel.processedRows += 1;
-                UpdateFunction.UpdateProcessedRow();
-            }
-        }
-
-        private string KeepChinese(string str)
-        {
-            string chineseString = "";
-
-            for (int i = 0; i < str.Length; i++)
-            {
-                if (str[i] >= 0x4E00 && str[i] <= 0x9FA5)
-                {
-                    chineseString += str[i];
-                }
-            }
-
-            return chineseString;
-        }
-
         public void WriteToCell(int i, int j, string s) {
             WS.Cells[i, j].Value2 = s;
+        }
+
+        public void UpdateMatrix()
+        {
+            this.rows = this.WS.UsedRange.Rows.Count;
+            this.cols = this.WS.UsedRange.Columns.Count;
         }
 
         public void Save()
@@ -160,7 +103,12 @@ namespace ExcelTransform
 
         public void Clear()
         {
-            Excel.processedRows = 0;
+            processedRows = 0;
+        }
+
+        public void columnDelete(int column)
+        {
+            WS.Cells[1, column].EntireColumn.Delete(null);
         }
     }
 }

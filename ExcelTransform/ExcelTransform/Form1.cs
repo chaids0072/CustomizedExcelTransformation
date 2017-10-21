@@ -20,20 +20,29 @@ namespace ExcelTransform
         public Form1()
         {
             InitializeComponent();
+            panel3.Visible = false;
             Court.LABEL = label5;
-            UpdateFunction.UpdateProcessedRow();
+            UpdateExcel.InitializeComponent();
         }
 
         private void Form1_DragDrop(object sender, DragEventArgs e)
         {
-            String[] _dropped_files = (String[])e.Data.GetData(DataFormats.FileDrop);
-
-            foreach (String _eachFile in _dropped_files)
+            if (Court.patternSelected)
             {
-                string _file_name = getFileName(_eachFile);
-                listBox2.Items.Add(_file_name);
-                transformDate(Path.GetFullPath(_file_name), Path.GetExtension(_file_name));
+                String[] _dropped_files = (String[])e.Data.GetData(DataFormats.FileDrop);
+
+                foreach (String _eachFile in _dropped_files)
+                {
+                    string _file_name = getFileName(_eachFile);
+                    listBox2.Items.Add(_file_name);
+                    transformDate(Path.GetFullPath(_file_name), Path.GetExtension(_file_name));
+                }
             }
+            else
+            {
+                MessageBox.Show("Please select a pattern first.");
+            }
+            
         }
 
         private void transformDate(string path, string ext)
@@ -44,24 +53,33 @@ namespace ExcelTransform
                 Court.excel = new Excel(@path, 1);
                 String[,] _temp = Court.excel.ReadAll();
 
-                for (int j = 0; j < Court.excel.cols; j++)
-                {
-                    string _expression = @"^[\p{L}]+(.*)\d+[.]?\d*%?$";
-                    Regex _objNotNumberPattern = new Regex(_expression);
-
-                    if (_objNotNumberPattern.IsMatch(_temp[1, j]))
+                if (Court.numberSeparated) {
+                    for (int j = 0; j < Court.excel.cols; j++)
                     {
-                        Court.excel.specfialCol = j + 1;
-                        break;
+                        string _expression = @"^[\p{L}]+(.*)\d+[.]?\d*%?$";
+                        Regex _objNotNumberPattern = new Regex(_expression);
+
+                        if (_objNotNumberPattern.IsMatch(_temp[1, j]))
+                        {
+                            Court.excel.specfialCol = j + 1;
+                            break;
+                        }
                     }
+
+                    Court.excel.pushCol(Court.excel.specfialCol);
+                    UpdateExcel.UpdateSpecialReplace();
+
+                    listBox1.Items.Add(System.IO.Path.GetFileNameWithoutExtension(path) + "...processed successfully!");
+                }
+                else if (Court.lineSeparated)
+                {
+                    Court.excel.specfialCol = 2;
+                    Court.excel.pushCol(Court.excel.specfialCol);
+                    UpdateExcel.UpdateSpecialSeparate();
                 }
 
-                Court.excel.pushCol(Court.excel.specfialCol);
-                Court.excel.specialReplace();
                 Court.excel.SaveAs(path.Insert(path.LastIndexOf("."), "_transformed"));
                 Court.excel.Close();
-
-                listBox1.Items.Add(System.IO.Path.GetFileNameWithoutExtension(path) + "...processed successfully!");
             }
             else
             {
@@ -85,7 +103,7 @@ namespace ExcelTransform
 
         private void button1_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("This program is designed to be used by GYQ.\nPlease contact her if any corrections need to be made.\nThank you for using.");
+            MessageBox.Show("This program is designed for GYQ.\n\nPlease contact her if any corrections need to be made.Thank you for using.\n\nAuthor: GC\nContact:GYQ");
             panelLeft.Height = button1.Height;
             panelLeft.Top = button1.Top;
         }
@@ -118,20 +136,59 @@ namespace ExcelTransform
 
         private void button2_Click(object sender, EventArgs e)
         {
-            listBox2.Items.Clear();
-            listBox1.Items.Clear();
-            Court.excel.Clear();
-            UpdateFunction.UpdateProcessedRow();
-        }
-
-        private void groupBox1_Enter(object sender, EventArgs e)
-        {
-
+            if (Court.excel == null) {
+                listBox2.Items.Clear();
+                listBox1.Items.Clear();
+                UpdateExcel.UpdateProcessedRow();
+                MessageBox.Show("You haven't started processing any file(s) yet.");
+            }
+            else
+            {
+                listBox2.Items.Clear();
+                listBox1.Items.Clear();
+                Court.excel.Clear();
+                UpdateExcel.UpdateProcessedRow();
+            }
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
+            if (panel3.Visible) panel3.Visible = false;
+            else panel3.Visible = true;
+        }
 
+
+        private void Form1_Click(object sender, EventArgs e)
+        {
+            panel3.Visible = false;
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            Court.currentExtraction = Court.expressionNumberExtraction;
+            Court.currentExtractionSymbol = Court.expressionNumberExtractionSymbol;
+            Court.patternSelected = true;
+            Court.numberSeparated = true;
+            Court.lineSeparated = false;
+            panel3.Visible = false;
+        }
+
+        private void panel3_MouseEnter(object sender, EventArgs e)
+        {
+            panel3.Visible = true;
+        }
+
+        private void panel3_MouseLeave(object sender, EventArgs e)
+        {
+            panel3.Visible = false;
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            Court.patternSelected = true;
+            Court.lineSeparated = true;
+            Court.numberSeparated = false;
+            panel3.Visible = false;
         }
     }
 }

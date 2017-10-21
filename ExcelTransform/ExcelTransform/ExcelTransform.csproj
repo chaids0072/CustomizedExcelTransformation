@@ -58,7 +58,7 @@
     <Compile Include="Functions\PaintFunction.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Functions\UpdateFunction.cs" />
+    <Compile Include="Functions\UpdateExcel.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
