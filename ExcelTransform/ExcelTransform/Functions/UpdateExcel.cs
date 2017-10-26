@@ -20,6 +20,53 @@ namespace ExcelTransform
             UpdateProcessedRow();
         }
 
+        public static int UpdateSpecialColumn()
+        {
+            int colToReturn = 0;
+            for (int row = Court.excel.WS.UsedRange.Row; row < Court.excel.rows + Court.excel.WS.UsedRange.Row; row++)
+            {
+                for (int col = Court.excel.WS.UsedRange.Column; col < Court.excel.cols + Court.excel.WS.UsedRange.Column; col++)
+                {
+                    string[] lines = Convert.ToString(Court.excel.WS.Cells[row, col].Value).Split(
+                        new[] { "\r\n", "\r", "\n" },
+                        StringSplitOptions.None
+                    );
+
+                    if (lines.Length > 2)
+                    {
+                        colToReturn = col;
+                        return colToReturn;
+                    }
+                }
+            }
+
+            return colToReturn;
+        }
+
+        public static int UpdateSpecialColumnByRow(int row)
+        {
+            int colToReturn = 0;
+            for (int col = Court.excel.WS.UsedRange.Column; col < Court.excel.cols + Court.excel.WS.UsedRange.Column; col++)
+            {
+                if (Court.excel.WS.Cells[row, col].Value == null) {
+                    return colToReturn;
+                }
+
+                string[] lines = Convert.ToString(Court.excel.WS.Cells[row, col].Value).Split(
+                    new[] { "\r\n", "\r", "\n" },
+                    StringSplitOptions.None
+                );
+
+                if (lines.Length > 2)
+                {
+                    colToReturn = col;
+                    return colToReturn;
+                }
+            }
+
+            return colToReturn;
+        }
+
         public static void UpdateSpecialSeparate()
         {
             ArrayList myLineList = new ArrayList();
@@ -46,7 +93,7 @@ namespace ExcelTransform
 
                 for (int y = 0; y < tempString.Length; y++)
                 {
-                   Court.excel.WriteToCell(tempLine + y, Court.excel.specfialCol + 1, tempString[y]);
+                   Court.excel.WriteToCell((tempLine + y), (Court.excel.specfialCol + 1), tempString[y]);
                 }
             }
 
@@ -54,43 +101,107 @@ namespace ExcelTransform
             int lastCopyRow = Court.excel.rows + Court.excel.WS.UsedRange.Row - 1;
             for (int iRow = myNumberList.Count - 1; iRow >= 0; iRow--)
             {
-
-                Court.excel.WriteToCell((int)myNumberList[iRow], Court.excel.specfialCol - 1, Convert.ToString(Court.excel.WS.Cells[lastCopyRow, Court.excel.specfialCol - 1].Value));
-                for (int v = Court.excel.specfialCol + 2; v < Court.excel.cols + Court.excel.WS.UsedRange.Column + 1; v++)
+                for (int v = Court.excel.WS.UsedRange.Column; v <= Court.excel.cols + Court.excel.WS.UsedRange.Column; v++)
                 {
-                    Court.excel.WriteToCell((int)myNumberList[iRow], v, Convert.ToString(Court.excel.WS.Cells[lastCopyRow, v].Value));
-                    if ((int)myNumberList[iRow] != lastCopyRow)
+                    if (v != Court.excel.specfialCol && v != Court.excel.specfialCol + 1)
                     {
-                        Court.excel.WS.Cells[lastCopyRow, v].Clear();
-                    }
-                }
+                        Court.excel.WriteToCell((int)myNumberList[iRow], v, Convert.ToString(Court.excel.WS.Cells[lastCopyRow, v].Value));
 
-                if ((int)myNumberList[iRow] != lastCopyRow)
-                {
-                    Court.excel.WS.Cells[lastCopyRow, Court.excel.specfialCol - 1].Clear();
+                        //Clear copied rows
+                        if ((int)myNumberList[iRow] != lastCopyRow)
+                        {
+                            Court.excel.WS.Cells[lastCopyRow, v].Clear();
+                        }
+                    } 
                 }
                 lastCopyRow--;
             }
 
-            
-
             //Merge row now
-            for (int m = 0; m < myNumberList.Count; m++)
+            for (int m = myNumberList.Count - 1; m >= 0; m--)
             {
-                for (int v = Court.excel.specfialCol + 2; v < Court.excel.cols + Court.excel.WS.UsedRange.Column + 1; v++)
+                for (int v = Court.excel.WS.UsedRange.Column; v <= Court.excel.cols + Court.excel.WS.UsedRange.Column; v++)
                 {
-                    Court.excel.WS.Range[Court.excel.WS.Cells[(int)myNumberList[m], v], Court.excel.WS.Cells[(int)myNumberList[m] + ((string[])myLineList[m]).Length - 1, v]].Merge();
+                    if (v != Court.excel.specfialCol && v != Court.excel.specfialCol + 1)
+                    {
+                        Court.excel.WS.Range[Court.excel.WS.Cells[(int)myNumberList[m], v], Court.excel.WS.Cells[(int)myNumberList[m] + ((string[])myLineList[m]).Length - 1, v]].Merge();
+                        Court.excel.WS.Range[Court.excel.WS.Cells[(int)myNumberList[m], v], Court.excel.WS.Cells[(int)myNumberList[m] + ((string[])myLineList[m]).Length - 1, v]].Style.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+                        Court.excel.WS.Range[Court.excel.WS.Cells[(int)myNumberList[m], v], Court.excel.WS.Cells[(int)myNumberList[m] + ((string[])myLineList[m]).Length - 1, v]].Style.VerticalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+                    }
+                    else
+                    {
+                        Court.excel.WS.Range[Court.excel.WS.Cells[(int)myNumberList[m], v], Court.excel.WS.Cells[(int)myNumberList[m] + ((string[])myLineList[m]).Length - 1, v]].Style.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+                        Court.excel.WS.Range[Court.excel.WS.Cells[(int)myNumberList[m], v], Court.excel.WS.Cells[(int)myNumberList[m] + ((string[])myLineList[m]).Length - 1, v]].Style.VerticalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+                    }
                 }
 
-                Court.excel.WS.Range[Court.excel.WS.Cells[(int)myNumberList[m], Court.excel.specfialCol - 1], Court.excel.WS.Cells[(int)myNumberList[m] + ((string[])myLineList[m]).Length - 1, Court.excel.specfialCol - 1]].Merge();
+                //Court.excel.WS.Range[Court.excel.WS.Cells[(int)myNumberList[m], col], Court.excel.WS.Cells[(int)myNumberList[m] + ((string[])myLineList[m]).Length - 1, col]].Merge();
                 Excel.processedRows += 1;
                 UpdateProcessedRow();
             }
 
             //delete special row
             Court.excel.columnDelete(Court.excel.specfialCol);
+            Court.excel.WS.Columns.AutoFit();
+            Court.excel.WS.Rows.AutoFit();
         }
 
+        public static void UpdateSpecialSeparateRandom()
+        {
+            int i = Court.excel.WS.UsedRange.Row;
+            while (i < Court.excel.rows + Court.excel.WS.UsedRange.Row)
+            {
+                int specialCol = UpdateSpecialColumnByRow(i);
+                if (specialCol != 0)
+                {
+                    //add new rows below the special row
+                    string[] lines = Convert.ToString(Court.excel.WS.Cells[i, specialCol].Value).Split(
+                    new[] { "\r\n", "\r", "\n" },
+                    StringSplitOptions.None
+                    );
+
+                    for (int j = 1; j < lines.Length; j++)
+                    {
+                        Court.excel.WS.Rows[i + 1].Insert();
+                    }
+
+                    for (int j = 1; j < lines.Length; j++)
+                    {
+                        Court.excel.WriteToCell(i + j, specialCol, lines[j]);
+                    }
+
+                    Court.excel.WriteToCell(i, specialCol, lines[0]);
+
+                    //Merge Rows
+                    for (int v = Court.excel.WS.UsedRange.Column; v < Court.excel.cols + Court.excel.WS.UsedRange.Column; v++)
+                    {
+                        if (v != specialCol)
+                        {
+                            Court.excel.WS.Range[Court.excel.WS.Cells[i, v], Court.excel.WS.Cells[i + lines.Length - 1, v]].Merge();
+                            Court.excel.WS.Range[Court.excel.WS.Cells[i, v], Court.excel.WS.Cells[i + lines.Length - 1, v]].Style.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+                            Court.excel.WS.Range[Court.excel.WS.Cells[i, v], Court.excel.WS.Cells[i + lines.Length - 1, v]].Style.VerticalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+                        }
+                        else
+                        {
+                            Court.excel.WS.Range[Court.excel.WS.Cells[i, v], Court.excel.WS.Cells[i + lines.Length - 1, v]].Style.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+                            Court.excel.WS.Range[Court.excel.WS.Cells[i, v], Court.excel.WS.Cells[i + lines.Length - 1, v]].Style.VerticalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+                        }
+                    }
+
+                    i += lines.Length;
+                }
+                else
+                {
+                    i += 1;
+                }
+                Court.excel.UpdateMatrix();
+                Excel.processedRows += 1;
+                UpdateProcessedRow();
+            }
+
+            Court.excel.WS.Columns.AutoFit();
+            Court.excel.WS.Rows.AutoFit();
+        }
         public static void UpdateSpecialReplace()
         {
             string expression = Court.currentExtraction;

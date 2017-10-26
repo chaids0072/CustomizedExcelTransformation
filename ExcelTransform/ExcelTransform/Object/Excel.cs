@@ -65,19 +65,25 @@ namespace ExcelTransform
 
         public void pushCol(int col)
         {
-            int _new_col = col + 1;
-            for (int i = this.cols + 1; i > _new_col; i--)
+            for (int i = WS.UsedRange.Columns.Count ; i > col; i--)
             {
-                for (int j = 1; j <= this.rows; j++)
+                for (int v = WS.UsedRange.Row; v < this.rows + WS.UsedRange.Row; v++)
                 {
-                    int _temp_col = i - 1;
-                    WS.Cells[j, i].Value2 = WS.Cells[j, _temp_col].Value2;
+                    WriteToCell(v,i+1, WS.Cells[v, i].Value2);
                 }
             }
         }
 
+        public void pushSingleCol(int row, int col)
+        {
+            for (int i = WS.UsedRange.Columns.Count; i > col; i--)
+            {
+                WriteToCell(row, i + 1, WS.Cells[row, i].Value2);
+            }
+        }
+
         public void WriteToCell(int i, int j, string s) {
-            WS.Cells[i, j].Value2 = s;
+            WS.Cells[i, j] = s;
         }
 
         public void UpdateMatrix()

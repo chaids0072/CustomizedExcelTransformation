@@ -50,36 +50,51 @@ namespace ExcelTransform
             if (string.Equals(ext, ".xlsx", StringComparison.CurrentCultureIgnoreCase)
                 || string.Equals(ext, ".xls", StringComparison.CurrentCultureIgnoreCase))
             {
-                Court.excel = new Excel(@path, 1);
-                String[,] _temp = Court.excel.ReadAll();
+                try
+                {
+                    Court.excel = new Excel(@path, 1);
+                    String[,] _temp = Court.excel.ReadAll();
 
-                if (Court.numberSeparated) {
-                    for (int j = 0; j < Court.excel.cols; j++)
+                    if (Court.numberSeparated)
                     {
-                        string _expression = @"^[\p{L}]+(.*)\d+[.]?\d*%?$";
-                        Regex _objNotNumberPattern = new Regex(_expression);
-
-                        if (_objNotNumberPattern.IsMatch(_temp[1, j]))
+                        for (int j = 0; j < Court.excel.cols; j++)
                         {
-                            Court.excel.specfialCol = j + 1;
-                            break;
+                            string _expression = @"^[\p{L}]+(.*)\d+[.]?\d*%?$";
+                            Regex _objNotNumberPattern = new Regex(_expression);
+
+                            if (_objNotNumberPattern.IsMatch(_temp[1, j]))
+                            {
+                                Court.excel.specfialCol = j + 1;
+                                break;
+                            }
                         }
+                        Court.excel.pushCol(Court.excel.specfialCol);
+                        UpdateExcel.UpdateSpecialReplace();
+
+                        listBox1.Items.Add(System.IO.Path.GetFileNameWithoutExtension(path) + "...processed successfully!");
+                    }
+                    else if (Court.lineSeparated)
+                    {
+
+                        //Court.excel.specfialCol = UpdateExcel.UpdateSpecialColumn();
+                        //if (Court.excel.specfialCol == 0)
+                        //{
+                        //    MessageBox.Show("Coundn't find a column with multiple lines.");
+                        //}
+                        //Court.excel.pushCol(Court.excel.specfialCol);
+                        //UpdateExcel.UpdateSpecialSeparate();
+                        UpdateExcel.UpdateSpecialSeparateRandom();
                     }
 
-                    Court.excel.pushCol(Court.excel.specfialCol);
-                    UpdateExcel.UpdateSpecialReplace();
-
-                    listBox1.Items.Add(System.IO.Path.GetFileNameWithoutExtension(path) + "...processed successfully!");
+                    Court.excel.SaveAs(path.Insert(path.LastIndexOf("."), "_transformed"));  
                 }
-                else if (Court.lineSeparated)
+                catch (Exception)
                 {
-                    Court.excel.specfialCol = 2;
-                    Court.excel.pushCol(Court.excel.specfialCol);
-                    UpdateExcel.UpdateSpecialSeparate();
+                    throw;
                 }
-
-                Court.excel.SaveAs(path.Insert(path.LastIndexOf("."), "_transformed"));
-                Court.excel.Close();
+                finally {
+                    Court.excel.Close();
+                }
             }
             else
             {
